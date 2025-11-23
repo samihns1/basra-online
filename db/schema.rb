@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_23_184059) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_23_224635) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -36,11 +36,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_23_184059) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "room_code"
+    t.string "name"
+    t.integer "max_players"
   end
 
   create_table "invitations", force: :cascade do |t|
     t.integer "sender_id"
-    t.string "reciptent_email"
+    t.string "recipient_email"
     t.integer "game_id"
     t.string "token"
     t.string "status"

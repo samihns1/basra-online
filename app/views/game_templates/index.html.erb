@@ -2,8 +2,6 @@
   Basra
 </h1>
 
-<hr>
-
 <article>
   <header>
     <h2>
@@ -11,8 +9,23 @@
     </h2>
   </header>
 
-    <form action="/insert_game" method="post">
+  <form action="/insert_game" method="post">
+    <div>
+      <label for="name_box">Game name</label>
+      <input type="text" id="name_box" name="query_name" placeholder="Game name (optional)">
+    </div>
+
+    <div>
+      <label for="max_players_box">Number of players</label>
+      <select id="max_players_box" name="query_max_players">
+        <option value="2">2 players</option>
+        <option value="3">3 players</option>
+        <option value="4">4 players</option>
+      </select>
+    </div>
+
     <button type="submit">
       Start game
     </button>
   </form>
+</article

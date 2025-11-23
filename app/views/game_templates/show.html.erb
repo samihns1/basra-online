@@ -74,11 +74,18 @@
       <%#= time_ago_in_words(@the_game.updated_at) %> ago-->
     <!--    </dd>-->
     <article>
-      <div>
-        <a href="/games">
-          Go back
-        </a>
-      </div>
+      <h3>Invite players</h3>
+
+      <form action="/insert_invitation" method="post">
+        <input type="hidden" name="query_game_id" value="<%= @the_game.id %>">
+
+        <div>
+          <label for="email_invite_box">Player email</label>
+          <input type="text" id="email_invite_box" name="query_recipient_email">
+        </div>
+
+        <button type="submit">Send Invite</button>
+      </form>
 
       <div>
         <a href="/delete_game/<%= @the_game.id %>">

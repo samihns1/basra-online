@@ -18,16 +18,20 @@ class InvitationsController < ApplicationController
   end
 
   def create
+    if current_user.nil?
+      redirect_to("/", { alert: "You must be signed in to send an invitation." })
+      return
+    end
+
     the_invitation = Invitation.new
-    the_invitation.sender_id = params.fetch("query_sender_id")
-    the_invitation.reciptent_email = params.fetch("query_reciptent_email")
+    the_invitation.sender_id = current_user.id
     the_invitation.game_id = params.fetch("query_game_id")
-    the_invitation.token = params.fetch("query_token")
-    the_invitation.status = params.fetch("query_status")
+    the_invitation.recipient_email = params.fetch("query_recipient_email")
+    the_invitation.status = "pending"
 
     if the_invitation.valid?
       the_invitation.save
-      redirect_to("/invitations", { :notice => "Invitation created successfully." })
+      redirect_to("/games/#{the_invitation.game_id}", { :notice => "Invitation created successfully." })
     else
       redirect_to("/invitations", { :alert => the_invitation.errors.full_messages.to_sentence })
     end
@@ -45,7 +49,7 @@ class InvitationsController < ApplicationController
 
     if the_invitation.valid?
       the_invitation.save
-      redirect_to("/invitations/#{the_invitation.id}", { :notice => "Invitation updated successfully." } )
+      redirect_to("/invitations/#{the_invitation.id}", { :notice => "Invitation updated successfully." })
     else
       redirect_to("/invitations/#{the_invitation.id}", { :alert => the_invitation.errors.full_messages.to_sentence })
     end
@@ -57,6 +61,6 @@ class InvitationsController < ApplicationController
 
     the_invitation.destroy
 
-    redirect_to("/invitations", { :notice => "Invitation deleted successfully." } )
+    redirect_to("/invitations", { :notice => "Invitation deleted successfully." })
   end
 end

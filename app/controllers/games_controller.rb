@@ -19,14 +19,20 @@ class GamesController < ApplicationController
 
     @game = Game.new
 
+    @game.name = params.fetch("query_name", nil).presence
+    @game.max_players = params.fetch("query_max_players", 2).to_i
+
+    @game.name ||= "Game ##{Game.count + 1}"
+
     @game.creator_id = current_user.id
     @game.status = "waiting"
     @game.started_at = Time.current
     @game.table_cards = [].to_json
     @game.deck_state = initial_deck.to_json
 
-    if @game.valid?
-      @game.save
+    if @game.save
+      Gameplayer.create!(game_id: @game.id, user_id: current_user.id, seat_number: 1, score: 0, hand_cards: [].to_json)
+
       redirect_to("/games/#{@game.id}", { :notice => "Game created successfully." })
     else
       redirect_to("/games", { :alert => @game.errors.full_messages.to_sentence })
@@ -91,6 +97,11 @@ class GamesController < ApplicationController
     end
 
     next_seat = the_game.gameplayers.count + 1
+
+    if the_game.gameplayers.count >= the_game.max_players
+      redirect_to("/join", { :alert => "This game is full." })
+      return
+    end
 
     new_gp = Gameplayer.new
     new_gp.game_id = the_game.id

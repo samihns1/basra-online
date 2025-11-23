@@ -3,7 +3,7 @@
 # Table name: invitations
 #
 #  id              :bigint           not null, primary key
-#  reciptent_email :string
+#  recipient_email :string
 #  status          :string
 #  token           :string
 #  created_at      :datetime         not null
