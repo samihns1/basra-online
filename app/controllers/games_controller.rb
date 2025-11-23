@@ -18,6 +18,11 @@ class GamesController < ApplicationController
   end
 
 def create
+  if current_user.nil?
+    redirect_to("/new_user", { :alert => "You must have an account to start a game." })
+    return
+  end
+
   @game = Game.new
 
   @game.creator = current_user
@@ -35,6 +40,15 @@ def create
     else
       redirect_to("/games", { :alert => the_game.errors.full_messages.to_sentence })
     end
+  end
+
+  private
+
+  def initial_deck
+    suits = %w[H D C S] # Hearts, Diamonds, Clubs, Spades
+    ranks = %w[A 2 3 4 5 6 7 8 9 10 J Q K]
+
+    suits.product(ranks).map { |suit, rank| "#{rank}#{suit}" }.shuffle
   end
 
   def update

@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   # Home
   root to: "home#index"
+  get("/new_user", { :controller => "home", :action => "new_user" })
 
   # Routes for the Invitation resource:
 
