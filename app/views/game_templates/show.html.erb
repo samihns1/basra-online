@@ -3,20 +3,9 @@
 </h1>
 
 <article>
-  <div>
-    <a href="/games">
-      Go back
-    </a>
-  </div>
-
-  <div>
-    <a href="/delete_game/<%= @the_game.id %>">
-      Delete game
-    </a>
-  </div>
   <dl>
     <dt>
-      Status
+      Game code
     </dt>
     <dd>
       <%= @the_game.status %>
@@ -84,6 +73,18 @@
     <dd>
       <%= time_ago_in_words(@the_game.updated_at) %> ago
     </dd>
+
+      <div>
+    <a href="/games">
+      Go back
+    </a>
+  </div>
+
+  <div>
+    <a href="/delete_game/<%= @the_game.id %>">
+      Delete game
+    </a>
+  </div>
   </dl>
 </article>
 
