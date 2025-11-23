@@ -1,7 +1,11 @@
 Rails.application.routes.draw do
-  # Home
+  # HOME
   root to: "home#index"
   get("/new_user", { :controller => "home", :action => "new_user" })
+
+  # RULES
+
+  get("/rules", { :controller => "home", :action => "rules"})
 
   # Routes for the Invitation resource:
 
@@ -79,7 +83,7 @@ Rails.application.routes.draw do
 
   #------------------------------
 
-  get("/join",       { :controller => "games", :action => "join_form" })
+  get("/join", { :controller => "games", :action => "join_form" })
   post("/join_game", { :controller => "games", :action => "join_by_code" })
 
   devise_for :users

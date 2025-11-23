@@ -110,7 +110,7 @@ class GamesController < ApplicationController
   private
 
   def initial_deck
-    suits = %w[H D C S]
+    suits = %w[♥ ♦ ♣ ♠]
     ranks = %w[A 2 3 4 5 6 7 8 9 10 J Q K]
 
     suits.product(ranks).map { |suit, rank| "#{rank}#{suit}" }.shuffle

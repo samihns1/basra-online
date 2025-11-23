@@ -6,4 +6,8 @@ class HomeController < ApplicationController
   def new_user
     render({ :template => "home_templates/new_user"})
   end
+
+  def rules
+    render({ :template => "home_templates/rules"})
+  end
 end
