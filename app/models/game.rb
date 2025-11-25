@@ -44,4 +44,12 @@ class Game < ApplicationRecord
       break code unless Game.exists?(room_code: code)
     end
   end
+
+  def table_cards_array
+    JSON.parse(table_cards || "[]")
+  end
+
+  def table_cards_array=(arr)
+    self.table_cards = arr.to_json
+  end
 end

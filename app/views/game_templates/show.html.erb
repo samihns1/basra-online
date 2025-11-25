@@ -1,5 +1,9 @@
 <h1>
-  Game #<%= @the_game.id %>
+  <% if @the_game.name.present? %>
+    <%= @the_game.name %>
+  <% else %>
+    Game #<%= @the_game.id %>
+  <% end %>
 </h1>
 
 <article>
@@ -11,90 +15,87 @@
     <dd><%= @the_game.creator&.username %></dd>
   </article>
 
-  <article> # Insert game here
-    <dl style="display: grid; grid-template-columns: 150px auto; row-gap: 8px;">
+  <article>
+    <h2>Insert Game Here</h2>
+  </article>
 
-      <dt>Table cards</dt>
-      <dd><%= @the_game.table_cards %></dd>
-    </article>
-
-    <!--<dt>
+  <!--<dt>
       Table cards
     </dt>
     <dd>
       <%#= @the_game.table_cards %>-->
-    <!--    </dd>
+  <!--    </dd>
 
     <dt>
       Deck state
     </dt>
     <dd>
       <%#= @the_game.deck_state %>-->
-    <!--    </dd>
+  <!--    </dd>
 
     <dt>
       Winning user
     </dt>
     <dd>
       <%#= @the_game.winning_user_id %>-->
-    <!--    </dd>
+  <!--    </dd>
 
     <dt>
       Started at
     </dt>
     <dd>
       <%#= @the_game.started_at %>-->
-    <!--    </dd>
+  <!--    </dd>
 
     <dt>
       Ended at
     </dt>
     <dd>
       <%#= @the_game.ended_at %>-->
-    <!--    </dd>
+  <!--    </dd>
 
     <dt>
       Gameplayers count
     </dt>
     <dd>
       <%#= @the_game.gameplayers_count %>-->
-    <!--    </dd>
+  <!--    </dd>
 
     <dt>
       Created at
     </dt>
     <dd>
       <%#= time_ago_in_words(@the_game.created_at) %> ago-->
-    <!--    </dd>
+  <!--    </dd>
 
     <dt>
       Updated at
     </dt>
     <dd>
       <%#= time_ago_in_words(@the_game.updated_at) %> ago-->
-    <!--    </dd>-->
-    <article>
-      <h3>Invite players</h3>
+  <!--    </dd>-->
+  <article>
+    <h3>Invite players</h3>
 
-      <form action="/insert_invitation" method="post">
-        <input type="hidden" name="query_game_id" value="<%= @the_game.id %>">
-
-        <div>
-          <label for="email_invite_box">Player email</label>
-          <input type="text" id="email_invite_box" name="query_recipient_email">
-        </div>
-
-        <button type="submit">Send Invite</button>
-      </form>
+    <form action="/insert_invitation" method="post">
+      <input type="hidden" name="query_game_id" value="<%= @the_game.id %>">
 
       <div>
-        <a href="/delete_game/<%= @the_game.id %>">
-          Delete game
-        </a>
+        <label for="email_invite_box">Player email</label>
+        <input type="text" id="email_invite_box" name="query_recipient_email">
       </div>
-    </article>
 
-    <!--<article>
+      <button type="submit">Send Invite</button>
+    </form>
+
+    <div>
+      <a href="/delete_game/<%= @the_game.id %>">
+        Delete game
+      </a>
+    </div>
+  </article>
+
+  <!--<article>
   <header>
     <h2>
       Edit game

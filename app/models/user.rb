@@ -28,4 +28,7 @@ class User < ApplicationRecord
   has_many  :invitations, class_name: "Invitation", foreign_key: "sender_id", dependent: :destroy
   has_many  :games, class_name: "Game", foreign_key: "creator_id", dependent: :destroy
   has_many  :games, class_name: "Game", foreign_key: "winning_user_id", dependent: :destroy
+
+  validates :email, uniqueness: true
+  validates :username, uniqueness: true
 end

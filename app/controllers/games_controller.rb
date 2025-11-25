@@ -5,8 +5,14 @@ class GamesController < ApplicationController
 
   def show
     the_id = params.fetch("path_id")
-    matching_games = Game.where({ :id => the_id })
-    @the_game = matching_games.at(0)
+    @the_game = Game.where({ :id => the_id }).at(0)
+
+    if current_user
+      @current_gameplayer = Gameplayer.find_by(
+        game_id: @the_game.id,
+        user_id: current_user.id
+      )
+    end
 
     render({ :template => "game_templates/show" })
   end
@@ -121,7 +127,7 @@ class GamesController < ApplicationController
   private
 
   def initial_deck
-    suits = %w[♥ ♦ ♣ ♠]
+    suits = %w[H D C S]
     ranks = %w[A 2 3 4 5 6 7 8 9 10 J Q K]
 
     suits.product(ranks).map { |suit, rank| "#{rank}#{suit}" }.shuffle

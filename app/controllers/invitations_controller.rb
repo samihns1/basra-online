@@ -17,23 +17,23 @@ class InvitationsController < ApplicationController
     render({ :template => "invitation_templates/show" })
   end
 
-  def create
+    def create
     if current_user.nil?
-      redirect_to("/", { alert: "You must be signed in to send an invitation." })
+      redirect_to("/", alert: "You must be signed in to send invites.")
       return
     end
 
-    the_invitation = Invitation.new
-    the_invitation.sender_id = current_user.id
-    the_invitation.game_id = params.fetch("query_game_id")
-    the_invitation.recipient_email = params.fetch("query_recipient_email")
-    the_invitation.status = "pending"
+    @invitation = Invitation.new
+    @invitation.game_id         = params.fetch("query_game_id")
+    @invitation.recipient_email = params.fetch("query_recipient_email")
+    @invitation.sender_id       = current_user.id  
 
-    if the_invitation.valid?
-      the_invitation.save
-      redirect_to("/games/#{the_invitation.game_id}", { :notice => "Invitation created successfully." })
+    if @invitation.save
+      InvitationMailer.game_invite(@invitation).deliver_now
+
+      redirect_to "/games/#{@invitation.game_id}", notice: "Invitation sent!"
     else
-      redirect_to("/invitations", { :alert => the_invitation.errors.full_messages.to_sentence })
+      redirect_to "/games/#{@invitation.game_id}", alert: @invitation.errors.full_messages.to_sentence
     end
   end
 

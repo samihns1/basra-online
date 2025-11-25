@@ -1,0 +1,17 @@
+<p>Hi,</p>
+
+<p>
+  <%= @sender.username %> has invited you to play a Basra game.
+</p>
+
+<p>
+  Game name: <strong><%= @game.name %></strong><br>
+  Game code: <strong><%= @game.room_code %></strong>
+</p>
+
+<p>
+  You can join by going to:
+  <a href="<%= @game_url %>"><%= @game_url %></a>
+</p>
+
+<p>See you at the table!</p>
