@@ -20,7 +20,11 @@
     <% @list_of_games.each do |a_game| %>
       <li>
         <a href="/games/<%= a_game.id %>">
-          Game #<%= a_game.id %>
+          <% if a_game.name.present? %>
+            <%= a_game.name %>
+          <% else %>
+            Game #<%= a_game.id %>
+          <% end %>
         </a>
       </li>
     <% end %>

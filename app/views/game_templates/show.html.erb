@@ -13,10 +13,22 @@
 
     <dt>Creator</dt>
     <dd><%= @the_game.creator&.username %></dd>
+
+    <dt>Status</dt>
+    <dd><%= @the_game.status.capitalize %></dd>
   </article>
 
   <article>
-    <h2>Insert Game Here</h2>
+    <h3>Game</h3>
+    <!--<span class="<%#= ['hearts', 'diamonds'].include?(card.suit) ? 'red-button' : 'black-button' %>">-->
+    <%#= card.name %>
+    <!--    </span>-->
+
+    <span class="red-button">Card 1</span>
+    <span class="red-button">Card 2</span>
+    <span class="black-button">Card 3</span>
+    <span class="black-button">Card 4</span>
+
   </article>
 
   <!--<dt>
@@ -74,6 +86,7 @@
     <dd>
       <%#= time_ago_in_words(@the_game.updated_at) %> ago-->
   <!--    </dd>-->
+
   <article>
     <h3>Invite players</h3>
 
