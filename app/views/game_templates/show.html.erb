@@ -18,6 +18,9 @@
       <dt>Status</dt>
       <dd><%= @the_game.status.capitalize %></dd>
     </dl>
+    <div style="margin-top:0.5rem; color:#555; font-size:0.95rem;">
+      Players joined: <strong><%= @the_game.gameplayers.count %></strong> / <%= (@the_game.max_players || 2) %>
+    </div>
   </article>
 <% end %>
 
@@ -136,6 +139,9 @@
       <dt>Status</dt>
       <dd><%= @the_game.status.capitalize %></dd>
     </dl>
+    <div style="margin-top:0.5rem; color:#555; font-size:0.95rem;">
+      Players joined: <strong><%= @the_game.gameplayers.count %></strong> / <%= (@the_game.max_players || 2) %>
+    </div>
   </article>
 <% end %>
 
