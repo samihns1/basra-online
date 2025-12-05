@@ -6,17 +6,20 @@
   <% end %>
 </h1>
 
-<article>
-  <dl style="display: grid; grid-template-columns: 150px auto; row-gap: 8px;">
-    <dt>Game code</dt>
-    <dd><%= @the_game.room_code %></dd>
+<% if @the_game.status != 'started' %>
+  <article>
+    <dl style="display: grid; grid-template-columns: 150px auto; row-gap: 8px;">
+      <dt>Game code</dt>
+      <dd><%= @the_game.room_code %></dd>
 
-    <dt>Creator</dt>
-    <dd><%= @the_game.creator&.username %></dd>
+      <dt>Creator</dt>
+      <dd><%= @the_game.creator&.username %></dd>
 
-    <dt>Status</dt>
-    <dd><%= @the_game.status.capitalize %></dd>
+      <dt>Status</dt>
+      <dd><%= @the_game.status.capitalize %></dd>
+    </dl>
   </article>
+<% end %>
 
   <% if @the_game.status == 'started' %>
     <article>
@@ -57,14 +60,14 @@
 
         <button type="submit">Send Invite</button>
       </form>
-    
-        <% if current_user && @current_gameplayer.nil? && current_user.id != @the_game.creator_id %>
-          <form action="/join_game/<%= @the_game.id %>" method="post" style="margin-top: 0.5rem;">
-            <button type="submit">Join this game</button>
-          </form>
-        <% elsif @current_gameplayer.present? %>
-          <div style="margin-top:0.5rem; color: green;">You have joined as seat <%= @current_gameplayer.seat_number %>.</div>
-        <% end %>
+
+      <% if current_user && @current_gameplayer.nil? && current_user.id != @the_game.creator_id %>
+        <form action="/join_game/<%= @the_game.id %>" method="post" style="margin-top: 0.5rem;">
+          <button type="submit">Join this game</button>
+        </form>
+      <% elsif @current_gameplayer.present? %>
+        <div style="margin-top:0.5rem; color: green;">You have joined as seat <%= @current_gameplayer.seat_number %>.</div>
+      <% end %>
     </article>
   <% else %>
 
@@ -102,13 +105,13 @@
               <% card = hand[i] %>
               <li style="text-align: center;">
                 <span class="<%= card_css_class(card) %>"><%= card_display_name(card) %></span>
-                  <% if card.present? && current_user.id == @the_game.current_player_id %>
-                    <form action="/insert_move" method="post" style="margin-top: 0.5rem;">
-                      <input type="hidden" name="query_game_id" value="<%= @the_game.id %>">
-                      <input type="hidden" name="query_card_played" value="<%= card %>">
-                      <button type="submit">Play</button>
-                    </form>
-                  <% end %>
+                <% if card.present? && current_user.id == @the_game.current_player_id %>
+                  <form action="/insert_move" method="post" style="margin-top: 0.5rem;">
+                    <input type="hidden" name="query_game_id" value="<%= @the_game.id %>">
+                    <input type="hidden" name="query_card_played" value="<%= card %>">
+                    <button type="submit">Play</button>
+                  </form>
+                <% end %>
               </li>
             <% end %>
             <% if current_user.id != @the_game.current_player_id %>
@@ -121,43 +124,58 @@
     <% end %>
   <% end %>
 
-  <article>
-    <div>
-      <a href="/delete_game/<%= @the_game.id %>">
-        Delete game
-      </a>
-    </div>
-  </article>
+  <% if @the_game.status == 'started' %>
+    <article>
+      <dl style="display: grid; grid-template-columns: 150px auto; row-gap: 8px;">
+        <dt>Game code</dt>
+        <dd><%= @the_game.room_code %></dd>
 
-  <script>
-    (function() {
-      const gameId = <%= @the_game.id %>;
-      let lastFingerprint = null;
+        <dt>Creator</dt>
+        <dd><%= @the_game.creator&.username %></dd>
 
-      async function poll() {
-        try {
-          const res = await fetch(`/games/${gameId}/state`);
-          if (!res.ok) return;
-          const json = await res.json();
+        <dt>Status</dt>
+        <dd><%= @the_game.status.capitalize %></dd>
+      </dl>
+    </article>
+  <% end %>
 
-          const fingerprint = JSON.stringify({
-            table: json.table_cards,
-            deck_count: json.deck_count,
-            current_player_id: json.current_player_id,
-            hand: json.hand
-          });
+    <article>
+      <div>
+        <a href="/delete_game/<%= @the_game.id %>">
+          Delete game
+        </a>
+      </div>
+    </article>
 
-          if (lastFingerprint !== null && lastFingerprint !== fingerprint) {
-            window.location.reload();
+    <script>
+      (function() {
+        const gameId = <%= @the_game.id %>;
+        let lastFingerprint = null;
+
+        async function poll() {
+          try {
+            const res = await fetch(`/games/${gameId}/state`);
+            if (!res.ok) return;
+            const json = await res.json();
+
+            const fingerprint = JSON.stringify({
+              table: json.table_cards,
+              deck_count: json.deck_count,
+              current_player_id: json.current_player_id,
+              hand: json.hand
+            });
+
+            if (lastFingerprint !== null && lastFingerprint !== fingerprint) {
+              window.location.reload();
+            }
+
+            lastFingerprint = fingerprint;
+          } catch (err) {
+            console.debug('game poll error', err);
           }
-
-          lastFingerprint = fingerprint;
-        } catch (err) {
-          console.debug('game poll error', err);
         }
-      }
-      
-      poll();
-      setInterval(poll, 2000);
-    })();
-  </script>
+
+        poll();
+        setInterval(poll, 2000);
+      })();
+    </script>
