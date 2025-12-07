@@ -74,6 +74,7 @@ Rails.application.routes.draw do
 
   get("/games/:path_id", { :controller => "games", :action => "show" })
   get("/games/:path_id/state", { :controller => "games", :action => "state" })
+  get("/games/:path_id/winner", { :controller => "games", :action => "winner" })
 
   # UPDATE
 
@@ -81,6 +82,7 @@ Rails.application.routes.draw do
 
   # Start game (deal initial hands and table)
   post("/start_game/:path_id", { :controller => "games", :action => "start" })
+  post("/start_next_round/:path_id", { :controller => "games", :action => "start_next_round" })
 
   # DELETE
   get("/delete_game/:path_id", { :controller => "games", :action => "destroy" })

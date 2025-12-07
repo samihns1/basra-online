@@ -104,6 +104,60 @@ class GamesController < ApplicationController
     end
   end
 
+  def start_next_round
+    the_id = params.fetch("path_id")
+    @the_game = Game.where({ id: the_id }).at(0)
+
+    if @the_game.nil?
+      redirect_to("/games", { alert: "Game not found." })
+      return
+    end
+
+    if current_user.nil? || current_user.id != @the_game.creator_id
+      redirect_to("/games/#{@the_game.id}", { alert: "Only the game creator can start the next round." })
+      return
+    end
+
+    begin
+      Basra::Engine.deal_initial(@the_game)
+
+      players = @the_game.gameplayers.order(:seat_number).to_a
+      if players.any?
+        reference_id = @the_game.current_player_id || @the_game.creator_id
+        idx = players.find_index { |gp| gp.user_id == reference_id } || 0
+        starter = players[(idx + 1) % players.length]
+        @the_game.current_player_id = starter.user_id
+        @the_game.save!
+      end
+
+      redirect_to("/games/#{@the_game.id}", { notice: "Next round started. Player #{starter&.seat_number} goes first." })
+    rescue => e
+      redirect_to("/games/#{@the_game.id}", { alert: "Failed to start next round: #{e.message}" })
+    end
+  end
+
+  def winner
+    the_id = params.fetch("path_id")
+    @the_game = Game.where({ id: the_id }).at(0)
+    if @the_game.nil?
+      redirect_to("/games", { alert: "Game not found." })
+      return
+    end
+
+    if @the_game.winning_user_id.present?
+      @winner = User.find_by(id: @the_game.winning_user_id)
+    else
+      gp = @the_game.gameplayers.max_by { |g| (g.score || 0) }
+      @winner = gp&.user
+    end
+
+    @scores = @the_game.gameplayers.order(:seat_number).map do |g|
+      { seat: g.seat_number, username: g.user&.username, score: g.score || 0 }
+    end
+
+    render({ template: "game_templates/winner" })
+  end
+
   def join_form
     matching_games = Game.all
     @list_of_games = matching_games.order({ :created_at => :desc })

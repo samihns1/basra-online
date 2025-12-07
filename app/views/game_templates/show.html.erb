@@ -6,6 +6,8 @@
   <% end %>
 </h1>
 
+<div id="game-root" data-game-id="<%= @the_game.id %>" style="display:none"></div>
+
 <% if @the_game.status != 'started' %>
   <article>
     <dl style="display: grid; grid-template-columns: 150px auto; row-gap: 8px;">
@@ -21,6 +23,32 @@
     <div style="margin-top:0.5rem; color:#555; font-size:0.95rem;">
       Players joined: <strong><%= @the_game.gameplayers.count %></strong> / <%= (@the_game.max_players || 2) %>
     </div>
+  </article>
+<% end %>
+
+<%
+  all_hands_empty = @the_game.gameplayers.all? { |gp| gp.hand_cards_array.empty? }
+  deck_empty = @the_game.deck_state_array.empty?
+%>
+
+<% if deck_empty && all_hands_empty %>
+  <article>
+    <h3>Round complete — scores</h3>
+    <ul style="list-style:none; padding:0; margin-left:1.5rem;">
+      <% @the_game.gameplayers.order(:seat_number).each do |gp| %>
+        <li style="padding:0.25rem 0;"><strong>Player <%= gp.seat_number %>:</strong> <%= gp.user&.username %> — <strong><%= gp.score || 0 %></strong> points</li>
+      <% end %>
+    </ul>
+
+    <% if current_user && current_user.id == @the_game.creator_id %>
+      <div style="margin-top:0.5rem;">
+        <form action="/start_next_round/<%= @the_game.id %>" method="post">
+          <button type="submit">Start next round</button>
+        </form>
+      </div>
+    <% else %>
+      <div style="margin-top:0.5rem; color:#666;">Waiting for the game creator to start the next round.</div>
+    <% end %>
   </article>
 <% end %>
 

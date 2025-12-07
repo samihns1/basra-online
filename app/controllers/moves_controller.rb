@@ -35,7 +35,6 @@ class MovesController < ApplicationController
       return
     end
 
-    # Enforce turn order: only current_player may play
     if @game.current_player_id.present? && current_user.id != @game.current_player_id
       current_player = User.where(id: @game.current_player_id).first
       name = current_player ? current_player.username : 'another player'
@@ -80,7 +79,6 @@ class MovesController < ApplicationController
     end
 
     if move.valid? && gameplayer.valid? && @game.valid?
-      # Determine next player (rotate by seat number)
       players = @game.gameplayers.order(:seat_number).to_a
       current_index = players.find_index { |gp| gp.user_id == current_user.id }
       next_user_id = nil
@@ -92,7 +90,6 @@ class MovesController < ApplicationController
       Move.transaction do
         move.save!
         gameplayer.save!
-        # set next player's turn (if found)
         @game.current_player_id = next_user_id if next_user_id
         @game.save!
       end
@@ -117,7 +114,28 @@ class MovesController < ApplicationController
               Move.transaction do
                 last_take.save!
                 @game.table_cards_array = []
-                @game.save!
+                  counts = Hash.new(0)
+                  @game.moves.where.not(captured_cards: [nil, "[]"]).each do |m|
+                    begin
+                      arr = JSON.parse(m.captured_cards || "[]")
+                      counts[m.user_id] += arr.length
+                    rescue JSON::ParserError
+                      next
+                    end
+                  end
+
+                  counts.each do |user_id, cnt|
+                    if cnt >= 27
+                      gp = Gameplayer.find_by(game_id: @game.id, user_id: user_id)
+                      if gp
+                        gp.score = (gp.score || 0) + 30
+                        gp.save!
+                      end
+                    end
+                  end
+
+                  @game.status = 'waiting'
+                  @game.save!
               end
             end
           end
@@ -126,6 +144,39 @@ class MovesController < ApplicationController
 
       notice_msg = "Played #{card_code}."
       notice_msg += " Basra!" if basra
+
+      scores = @game.gameplayers.map { |gp| [gp.user_id, (gp.score || 0)] }.to_h
+      max_score = scores.values.max || 0
+      if max_score >= 180
+        tied_user_ids = scores.select { |_, s| s == max_score }.keys
+
+        if tied_user_ids.length == 1
+          winner_user_id = tied_user_ids.first
+          @game.winning_user_id = winner_user_id
+          @game.status = 'finished'
+          @game.save!
+          begin
+            GameChannel.broadcast_to(@game, { event: 'winner', winning_user_id: winner_user_id })
+          rescue => e
+            Rails.logger.info "GameChannel broadcast failed: #{e.message}"
+          end
+
+          redirect_to("/games/#{@game.id}/winner", { notice: "#{User.find_by(id: winner_user_id)&.username} has reached #{max_score} points!" })
+          return
+        else
+          @game.status = 'waiting'
+          @game.save!
+
+          begin
+            GameChannel.broadcast_to(@game, { event: 'tie', tied_user_ids: tied_user_ids, message: "Tie at #{max_score} — play additional rounds to determine the winner." })
+          rescue => e
+            Rails.logger.info "GameChannel broadcast failed: #{e.message}"
+          end
+
+          redirect_to("/games/#{@game.id}", { notice: "Tie at #{max_score} points between players — play more rounds to decide the winner." })
+          return
+        end
+      end
 
       redirect_to("/games/#{@game.id}", { notice: notice_msg })
     else

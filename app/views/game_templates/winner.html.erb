@@ -1,0 +1,20 @@
+<h1>Game Over</h1>
+
+<article>
+  <% if @winner %>
+    <h2>Winner: <%= @winner.username %></h2>
+  <% else %>
+    <h2>Winner</h2>
+  <% end %>
+
+  <h3>Final scores</h3>
+  <ul style="list-style:none; padding:0;">
+    <% @scores.each do |s| %>
+      <li style="padding:0.25rem 0;"><strong>Seat <%= s[:seat] %>:</strong> <%= s[:username] %> — <strong><%= s[:score] %></strong> points</li>
+    <% end %>
+  </ul>
+
+  <div style="margin-top:1rem;">
+    <a href="/games">Back to games</a>
+  </div>
+</article>
