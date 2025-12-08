@@ -8,7 +8,7 @@
 
 <div id="game-root" data-game-id="<%= @the_game.id %>" style="display:none"></div>
 
-<% if @the_game.status != 'started' %>
+<% if @the_game.status != 'started' && @the_game.moves.count == 0 %>
   <article>
     <dl style="display: grid; grid-template-columns: 150px auto; row-gap: 8px;">
       <dt>Game code</dt>
@@ -66,10 +66,18 @@
   <article>
     <h3>Game</h3>
     <% if current_user && current_user.id == @the_game.creator_id %>
+      <% players_count = @the_game.gameplayers.count %>
       <div style="margin-top: 0.5rem;">
-        <form action="/start_game/<%= @the_game.id %>" method="post">
-          <button type="submit">Start game</button>
-        </form>
+        <% if players_count >= 2 %>
+          <form action="/start_game/<%= @the_game.id %>" method="post">
+            <button type="submit">Start game</button>
+          </form>
+        <% else %>
+          <form>
+            <button type="button" disabled style="opacity:0.6;">Start game</button>
+            <span style="color:#b00; margin-left:0.5rem;">Need at least 2 players to start (currently <%= players_count %>).</span>
+          </form>
+        <% end %>
       </div>
     <% else %>
       <dd>Waiting for host to start the game.</dd>
@@ -77,7 +85,7 @@
   </article>
 <% end %>
 
-<% if @the_game.status != 'started' && current_user.id == @the_game.creator_id %>
+<% if @the_game.status != 'started' && @the_game.moves.count == 0 && current_user.id == @the_game.creator_id %>
   <article>
     <h3>Invite players</h3>
 

@@ -88,6 +88,11 @@ class GamesController < ApplicationController
       return
     end
 
+    if @the_game.gameplayers.count < 2
+      redirect_to("/games/#{@the_game.id}", { alert: "At least two players are required to start the game. Currently #{@the_game.gameplayers.count} player(s) have joined." })
+      return
+    end
+
     begin
       Basra::Engine.deal_initial(@the_game)
 
@@ -115,6 +120,10 @@ class GamesController < ApplicationController
 
     if current_user.nil? || current_user.id != @the_game.creator_id
       redirect_to("/games/#{@the_game.id}", { alert: "Only the game creator can start the next round." })
+      return
+    end
+    if @the_game.gameplayers.count < 2
+      redirect_to("/games/#{@the_game.id}", { alert: "At least two players are required to start a round. Currently #{@the_game.gameplayers.count} player(s) have joined." })
       return
     end
 
