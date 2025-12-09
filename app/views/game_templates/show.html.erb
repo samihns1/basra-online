@@ -196,6 +196,25 @@
   .danger-link:hover {
     text-decoration: underline;
   }
+
+  .btn-delete {
+  background: transparent !important;
+  color: #b91c1c !important;
+  border: 2px solid #f78c8cff !important;
+  padding: 0.25rem 0.65rem !important;
+  font-size: 0.8rem !important;
+  border-radius: 999px !important;
+  width: auto !important;
+  display: inline-block !important;
+  box-shadow: none !important;
+  }
+
+  .btn-delete:hover {
+  background: #fdd8d8ff !important;
+  color: #b91c1c !important;
+  border-color: #f87171 !important;
+  transform: translateY(-1px);
+  }
 </style>
 
 <div class="game-layout">
@@ -373,7 +392,7 @@
   <% if current_user && current_user.id == @the_game.creator_id %>
     <article class="section-card" style="text-align:right;">
       <form action="/delete_game/<%= @the_game.id %>" method="get" style="display:inline;">
-        <button type="submit" class="btn btn-danger">
+        <button type="submit" class="btn btn-delete">
           Delete game
         </button>
       </form>
