@@ -113,6 +113,32 @@
 .spectate-row:hover .spectate-arrow {
   color: #6b7280;
 }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-waiting {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-started {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-finished {
+  background: #e5e7eb;
+  color: #374151;
+}
 </style>
 
 
@@ -140,12 +166,26 @@
   <div class="spectate-table">
     <% @list_of_games.each do |a_game| %>
       <a href="/games/<%= a_game.id %>" class="spectate-row">
-        <div class="spectate-name">
-          <% if a_game.name.present? %>
-            <%= a_game.name %>
-          <% else %>
-            Game #<%= a_game.id %>
-          <% end %>
+        <div class="spectate-name" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <div style="font-weight: 600;">
+            <% if a_game.name.present? %>
+              <%= a_game.name %>
+            <% else %>
+              Game #<%= a_game.id %>
+            <% end %>
+          </div>
+          <div style="font-size: 0.85rem; color: #6b7280; display: flex; align-items: center; gap: 0.5rem;">
+            <% status_class =
+              case a_game.status
+              when 'started' then 'status-started'
+              when 'finished' then 'status-finished'
+              else 'status-waiting'
+              end %>
+            <span class="status-pill <%= status_class %>">
+              <%= a_game.status.capitalize %>
+            </span>
+            <span>• <%= a_game.gameplayers_count %>/<%= a_game.max_players %> players</span>
+          </div>
         </div>
 
         <div class="spectate-arrow">›</div>
@@ -153,3 +193,48 @@
     <% end %>
   </div>
 </div>
+
+<script>
+  (function() {
+    const games = <%= raw @list_of_games.map { |g| { id: g.id, name: g.name, status: g.status, players: g.gameplayers_count } }.to_json %>;
+    let lastFingerprint = JSON.stringify(games);
+    
+    async function pollGameList() {
+      try {
+        const res = await fetch(window.location.href, {
+          headers: { 'Accept': 'text/html' }
+        });
+        
+        if (!res.ok) {
+          console.debug('Failed to fetch game list');
+          return;
+        }
+        
+        const html = await res.text();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const gameRows = doc.querySelectorAll('.spectate-row');
+        
+        const currentGames = Array.from(gameRows).map(row => {
+          const href = row.getAttribute('href');
+          const name = row.querySelector('.spectate-name')?.textContent?.trim();
+          return { href, name };
+        });
+        
+        const currentFingerprint = JSON.stringify(currentGames);
+        
+        if (lastFingerprint !== currentFingerprint) {
+          console.log('Game list changed, refreshing page...');
+          window.location.reload();
+        }
+        
+        lastFingerprint = currentFingerprint;
+      } catch (err) {
+        console.debug('Poll error:', err);
+      }
+    }
+    
+    setInterval(pollGameList, 3000);
+  })();
+</script>
