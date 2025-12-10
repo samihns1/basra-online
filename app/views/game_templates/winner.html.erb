@@ -84,17 +84,43 @@
     filter: brightness(0.9);
     transform: translateY(-2px);
   }
+
+  .winner-announcement {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 3px solid #f59e0b;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .winner-announcement h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #78350f;
+  }
+  
+  .winner-announcement .winner-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #92400e;
+  }
 </style>
 
 <div class="gameover-card">
 
-  <h1>Game Over</h1>
-
-  <% if @winner %>
-    <div class="winner-name">Winner: <%= @winner.username %></div>
-  <% else %>
-    <div class="winner-name">Winner</div>
-  <% end %>
+  <article class="winner-announcement">
+    <h2>🏆 Game Over!</h2>
+    <% if @winner %>
+      <p style="margin: 0; font-size: 1.1rem; color: #78350f;">
+        Winner: <span class="winner-name"><%= @winner.username %></span>
+      </p>
+    <% else %>
+      <p style="margin: 0; font-size: 1.1rem; color: #78350f;">
+        <span class="winner-name">Game has ended</span>
+      </p>
+    <% end %>
+  </article>
 
   <div class="scores-title">Final Scores</div>
 
@@ -118,6 +144,6 @@
     </tbody>
   </table>
 
-  <a href="/games" class="back-link">Back to games</a>
+  <a href="/join" class="back-link">Back to games</a>
 
 </div>

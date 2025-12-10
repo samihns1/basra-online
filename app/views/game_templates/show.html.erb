@@ -254,9 +254,49 @@
     deck_empty = @the_game.deck_state_array.empty?
   %>
 
+  <% if @the_game.status == 'finished' %>
+    <style>
+      .winner-announcement {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 3px solid #f59e0b;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+      
+      .winner-announcement h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #78350f;
+      }
+      
+      .winner-announcement .winner-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #92400e;
+      }
+    </style>
+    
+    <article class="section-card winner-announcement">
+      <h2>🏆 Game Over!</h2>
+      <% winner = User.find_by(id: @the_game.winning_user_id) %>
+      <% if winner %>
+        <p style="margin: 0; font-size: 1.1rem; color: #78350f;">
+          Winner: <span class="winner-name"><%= winner.username %></span>
+        </p>
+      <% else %>
+        <p style="margin: 0; font-size: 1.1rem; color: #78350f;">
+          <span class="winner-name">Game has ended</span>
+        </p>
+      <% end %>
+    </article>
+  <% end %>
+
   <% if deck_empty && all_hands_empty %>
     <article class="section-card">
-      <h3>Round complete — scores</h3>
+      <h3><%= @the_game.status == 'finished' ? 'Game complete — scores' : 'Round complete — scores' %></h3>
       <% 
         last_round_stats = {}
         if @the_game.last_round_stats.present?
@@ -273,29 +313,33 @@
             <strong>Player <%= gp.seat_number %>:</strong>
             <%= gp.user&.username %> —
             <strong><%= gp.score || 0 %></strong> points
-            <% round_earned = last_round_stats[gp.user_id.to_s].to_i %>
-            <% if round_earned > 0 %>
-              <span class="round-majority-pill">+<%= round_earned %> points</span>
+            <% if @the_game.status != 'finished' %>
+              <% round_earned = last_round_stats[gp.user_id.to_s].to_i %>
+              <% if round_earned > 0 %>
+                <span class="round-majority-pill">+<%= round_earned %> points</span>
+              <% end %>
             <% end %>
           </li>
         <% end %>
       </ul>
 
-      <% if current_user && current_user.id == @the_game.creator_id %>
-        <div style="margin-top:0.75rem;">
-          <form action="/start_next_round/<%= @the_game.id %>" method="post" style="display:inline;">
-            <button type="submit" class="btn btn-primary">Start next round</button>
-          </form>
-        </div>
-      <% else %>
-        <div style="margin-top:0.75rem;" class="helper-text-muted">
-          Waiting for the game creator to start the next round.
-        </div>
+      <% if @the_game.status != 'finished' %>
+        <% if current_user && current_user.id == @the_game.creator_id %>
+          <div style="margin-top:0.75rem;">
+            <form action="/start_next_round/<%= @the_game.id %>" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-primary">Start next round</button>
+            </form>
+          </div>
+        <% else %>
+          <div style="margin-top:0.75rem;" class="helper-text-muted">
+            Waiting for the game creator to start the next round.
+          </div>
+        <% end %>
       <% end %>
     </article>
 
     <% last_take = @the_game.moves.where(card_played: nil).order(created_at: :desc).first %>
-    <% if last_take.present? %>
+    <% if last_take.present? && @the_game.status != 'finished' %>
       <% prev_last = @the_game.moves.where(card_played: nil).order(created_at: :desc).second %>
       <% hand_moves =
       if prev_last
@@ -448,7 +492,7 @@
     <% end %>
   <% end %>
 
-  <% if @the_game.status == 'started' %>
+  <% if @the_game.status == 'started' && !(deck_empty && all_hands_empty) %>
 
     <% if @the_game.moves.any? %>
       <% last_move = @the_game.moves.where.not(card_played: nil).order(created_at: :desc).first %>
@@ -589,7 +633,11 @@
         </div>
       <% else %>
         <p class="helper-text-muted" style="margin-top:0.5rem;">
-          Waiting for host to start the game.
+          <% if @the_game.status == 'finished' %>
+            Game has ended.
+          <% else %>
+            Waiting for host to start the game.
+          <% end %>
         </p>
       <% end %>
     </article>
